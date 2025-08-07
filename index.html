@@ -2566,14 +2566,14 @@
                   <button class="subscription-btn active" data-type="onetime">
                     One Time Purchase
                   </button>
-                  <button class="subscription-btn" data-type="subscribe">
+                  <button class="subscription-btn" data-type="subscribe" id="subscribeBtn1">
                     Subscribe & Save
                   </button>
                 </div>
               </div>
 
               <!-- Product Variants -->
-              <div class="pricing-options" id="variantContainer">
+              <div class="pricing-options" id="variantContainer1">
                 <div class="pricing-card selected" data-variant="1-pack" data-price="39.95" data-compare="50.00">
                   <div class="pricing-card-content">
                     <img src="https://trynutralife.com/cdn/shop/files/pack1.webp?v=1751697969" alt="Just One Pack"
@@ -3426,14 +3426,14 @@
                   <button class="subscription-btn active" data-type="onetime">
                     One Time Purchase
                   </button>
-                  <button class="subscription-btn" data-type="subscribe">
+                  <button class="subscription-btn" data-type="subscribe" id="subscribeBtn2">
                     Subscribe & Save
                   </button>
                 </div>
               </div>
 
               <!-- Product Variants -->
-              <div class="pricing-options" id="variantContainer">
+              <div class="pricing-options" id="variantContainer2">
                 <div class="pricing-card selected" data-variant="1-pack" data-price="39.95" data-compare="50.00">
                   <div class="pricing-card-content">
                     <img src="https://trynutralife.com/cdn/shop/files/pack1.webp?v=1751697969" alt="Just One Pack"
@@ -3989,10 +3989,70 @@ function setupVariantSelection(variants, currentPriceId, comparePriceId) {
 
       subscriptionBtns.forEach(btn => {
         btn.addEventListener('click', function () {
-          subscriptionBtns.forEach(b => b.classList.remove('active'));
+          // Remove active from all buttons in the same subscription toggle
+          const parentToggle = this.closest('.subscription-toggle');
+          const siblingBtns = parentToggle.querySelectorAll('.subscription-btn');
+          siblingBtns.forEach(b => b.classList.remove('active'));
           this.classList.add('active');
+
+          // Handle Subscribe & Save functionality
+          if (this.dataset.type === 'subscribe') {
+            handleSubscribeAndSave(this);
+          } else {
+            // If switching back to one-time purchase, show all cards
+            const section = this.closest('section');
+            const productCards = section.querySelectorAll('.pricing-card');
+            productCards.forEach(card => {
+              card.style.display = 'block';
+            });
+          }
         });
       });
+    }
+
+    // ==================== SUBSCRIBE & SAVE FUNCTIONALITY START ====================
+    function handleSubscribeAndSave(button) {
+      // Find the section containing this button
+      const section = button.closest('section');
+      const pricingContainer = section.querySelector('.pricing-options');
+      const productCards = pricingContainer.querySelectorAll('.pricing-card');
+      
+      // Hide all cards except the first one
+      productCards.forEach((card, index) => {
+        if (index === 0) {
+          card.style.display = 'block';
+          // Make sure the first card is selected
+          card.classList.add('selected');
+        } else {
+          card.style.display = 'none';
+          card.classList.remove('selected');
+        }
+      });
+
+      // Update price display for the visible card
+      const firstCard = productCards[0];
+      if (firstCard) {
+        const price = firstCard.dataset.price;
+        const comparePrice = firstCard.dataset.compare;
+        
+        // Find the price display elements in this section
+        const sectionId = section.id;
+        let currentPriceId, comparePriceId;
+        
+        if (sectionId === 'section1') {
+          currentPriceId = 'currentPrice';
+          comparePriceId = 'comparePrice';
+        } else if (sectionId === 'section2') {
+          currentPriceId = 'currentPrice2';
+          comparePriceId = 'comparePrice2';
+        }
+        
+        const currentPriceElement = document.getElementById(currentPriceId);
+        const comparePriceElement = document.getElementById(comparePriceId);
+        
+        if (currentPriceElement) currentPriceElement.textContent = ` $${price} `;
+        if (comparePriceElement) comparePriceElement.textContent = ` $${comparePrice}`;
+      }
     }
 
     // ==================== ADD TO CART FUNCTIONALITY START ====================
